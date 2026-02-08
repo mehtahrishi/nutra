@@ -1,0 +1,47 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-food",
+      "description": "A vibrant bowl of healthy salad with orange accents",
+      "imageUrl": "https://picsum.photos/seed/nutri1/1200/600",
+      "imageHint": "healthy salad"
+    },
+    {
+      "id": "recipe-pasta",
+      "description": "Delicious healthy pasta dish",
+      "imageUrl": "https://picsum.photos/seed/nutri2/600/400",
+      "imageHint": "healthy pasta"
+    },
+    {
+      "id": "recipe-smoothie",
+      "description": "Refreshing fruit smoothie",
+      "imageUrl": "https://picsum.photos/seed/nutri3/600/400",
+      "imageHint": "fruit smoothie"
+    },
+    {
+      "id": "recipe-bowl",
+      "description": "Buddha bowl with colorful veggies",
+      "imageUrl": "https://picsum.photos/seed/nutri4/600/400",
+      "imageHint": "buddha bowl"
+    },
+    {
+      "id": "recipe-salmon",
+      "description": "Grilled salmon with asparagus",
+      "imageUrl": "https://picsum.photos/seed/nutri5/600/400",
+      "imageHint": "grilled salmon"
+    },
+    {
+      "id": "category-vegan",
+      "description": "Fresh vegan ingredients",
+      "imageUrl": "https://picsum.photos/seed/nutri6/400/400",
+      "imageHint": "vegan food"
+    },
+    {
+      "id": "category-keto",
+      "description": "High protein keto ingredients",
+      "imageUrl": "https://picsum.photos/seed/nutri7/400/400",
+      "imageHint": "keto diet"
+    }
+  ]
+}
