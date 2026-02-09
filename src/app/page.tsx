@@ -9,13 +9,20 @@ import { FoodParticles } from '@/components/FoodParticles';
 import { ScrollAnimation } from '@/components/ScrollAnimation';
 import { FaAlgolia } from 'react-icons/fa6';
 
-// Revalidate this page every 30 seconds to show fresh recipes
-export const revalidate = 30;
+// Force dynamic rendering - always fetch fresh data
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 async function getFeaturedRecipes() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9002'}/api/recipes/featured`, {
-      cache: 'no-store'
+    // Build the correct URL based on environment
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9002';
+    
+    const res = await fetch(`${baseUrl}/api/recipes/featured`, {
+      cache: 'no-store',
+      next: { revalidate: 0 }
     });
     if (!res.ok) return [];
     const data = await res.json();
