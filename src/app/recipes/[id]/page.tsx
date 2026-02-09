@@ -125,8 +125,11 @@ function parseIngredients(ingredients: any[] | string): Array<{item: string, qua
 
 // Helper function to parse instructions into separate steps
 function parseInstructions(instructions: string[] | string): string[] {
+  console.log('📝 RAW INSTRUCTIONS:', JSON.stringify(instructions, null, 2));
+  console.log('📝 TYPE:', Array.isArray(instructions) ? `Array[${instructions.length}]` : typeof instructions);
+  
   // If already an array with multiple items, clean each one
-  if (Array.isArray(instructions) && instructions.length > 0) {
+  if (Array.isArray(instructions) && instructions.length > 1) {
     const cleanedSteps = instructions.map(instruction => {
       let cleaned = cleanMarkdown(instruction);
       // Remove leading numbers like "1. " or "1) "
@@ -134,21 +137,22 @@ function parseInstructions(instructions: string[] | string): string[] {
       return cleaned;
     }).filter(s => s.length > 0);
     
-    if (cleanedSteps.length > 0) return cleanedSteps;
-    
-    // If cleaning resulted in empty, try parsing the first item
-    if (instructions.length === 1) {
-      return parseInstructionString(instructions[0]);
-    }
+    console.log('✅ MULTI-ITEM ARRAY - Returning', cleanedSteps.length, 'steps');
+    return cleanedSteps;
   }
   
-  // If single string, parse it
+  // Single item (either array with 1 element or string) - needs parsing
   const text = Array.isArray(instructions) ? instructions[0] : instructions;
-  return parseInstructionString(text);
+  console.log('🔍 PARSING SINGLE TEXT:', text?.substring(0, 100) + '...');
+  const result = parseInstructionString(text);
+  console.log('✅ PARSED INTO', result.length, 'steps');
+  return result;
 }
 
 function parseInstructionString(text: string): string[] {
   if (!text) return [];
+  
+  console.log('🔧 parseInstructionString - Input length:', text.length);
   
   // Remove markdown formatting (bold, italic, etc.)
   text = text
@@ -160,41 +164,40 @@ function parseInstructionString(text: string): string[] {
   // First try: Split by newlines (most common in AI responses)
   let steps = text.split(/\n+/).filter(s => s.trim());
   if (steps.length > 1) {
+    console.log('✅ Split by newlines:', steps.length, 'steps');
     return steps.map(s => s.replace(/^\d+[\.\)]\s+/, '').trim()).filter(s => s.length > 0);
   }
   
-  // Second try: Split by embedded numbered patterns like "aside.2. In"
-  // Pattern: period or end of sentence + number + period + space
-  const embeddedNumberPattern = /\.(\d+)\.\s+/g;
+  // Second try: Split by embedded numbered patterns like "aside.2. In" or "thoroughly.3. Mix"
+  // Pattern: any text followed by period + number + period + space
+  const embeddedNumberPattern = /\.(\d+)\.\s+/;
   
   if (embeddedNumberPattern.test(text)) {
-    // Reset regex
-    embeddedNumberPattern.lastIndex = 0;
+    console.log('🔍 Found embedded numbers pattern');
+    
+    // Split by the pattern and rebuild with proper steps
+    const parts = text.split(/\.(\d+)\.\s+/);
+    console.log('🔍 Split parts:', parts.length);
     
     steps = [];
-    let lastIndex = 0;
-    let match;
     
-    while ((match = embeddedNumberPattern.exec(text)) !== null) {
-      // Extract text from last position to before the number pattern
-      const stepText = text.substring(lastIndex, match.index + 1).trim(); // +1 to include the period before number
+    // First element is before any number (step 1)
+    if (parts[0] && parts[0].trim()) {
+      steps.push(parts[0].replace(/^\d+[\.\)]\s+/, '').trim());
+    }
+    
+    // Process remaining parts in pairs: [number, text, number, text, ...]
+    for (let i = 1; i < parts.length; i += 2) {
+      const stepNumber = parts[i]; // The number (2, 3, 4, etc.)
+      const stepText = parts[i + 1]; // The text after the number
       
-      if (stepText && steps.length === 0) {
-        // First step - remove any leading number
-        steps.push(stepText.replace(/^\d+[\.\)]\s+/, '').trim());
+      if (stepText && stepText.trim()) {
+        steps.push(stepText.trim());
       }
-      
-      lastIndex = match.index + match[0].length - 1; // Position after the pattern
     }
     
-    // Add the last step
-    const lastStep = text.substring(lastIndex).trim();
-    if (lastStep) {
-      steps.push(lastStep);
-    }
-    
-    // If we got multiple steps, return them
     if (steps.length > 1) {
+      console.log('✅ Split by embedded numbers:', steps.length, 'steps');
       return steps.filter(s => s.length > 0);
     }
   }
@@ -202,6 +205,7 @@ function parseInstructionString(text: string): string[] {
   // Third try: Standard numbered pattern at start of string
   steps = text.split(/(?=\d+[\.\)]\s+)/).filter(s => s.trim());
   if (steps.length > 1) {
+    console.log('✅ Split by standard numbers:', steps.length, 'steps');
     return steps.map(s => s.replace(/^\d+[\.\)]\s+/, '').trim()).filter(s => s.length > 0);
   }
   
@@ -209,12 +213,14 @@ function parseInstructionString(text: string): string[] {
   const actionPattern = /\.\s+(?=(?:Heat|Add|Mix|Stir|Cook|Bake|Pour|Place|Remove|Combine|Whisk|Fold|Serve|Garnish|Season|Chop|Cut|Slice|Preheat|Transfer|Bring|Reduce|Simmer|Boil|Fry|Sauté|Roast|Grill|Blend|Drain|Rinse|Pat|Sprinkle|Drizzle|Toss|Let|Allow|Set|Cover|Uncover|Continue|Once|If|The)\s+[a-z])/g;
   steps = text.split(actionPattern).filter(s => s.trim());
   if (steps.length > 1) {
+    console.log('✅ Split by action verbs:', steps.length, 'steps');
     return steps.map(s => {
       s = s.trim();
       return s.endsWith('.') ? s : s + '.';
     });
   }
   
+  console.log('⚠️ No split method worked - returning single step');
   // Return as single step if no clear separation
   return [text.trim()];
 }
