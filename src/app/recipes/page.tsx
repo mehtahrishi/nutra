@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Clock, Flame, Heart, Loader2, ChefHat, Filter, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { InstantSearch, Configure, useSearchBox, useHits } from 'react-instantsearch';
+import { InstantSearch, Configure, useSearchBox, useHits, useInstantSearch } from 'react-instantsearch';
 import { searchClient, ALGOLIA_INDEX_NAME } from '@/lib/algolia';
 import {
   Dialog,
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from '@/components/ui/input';
 import { FaAlgolia } from 'react-icons/fa6';
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Recipe {
   _id: string;
@@ -96,10 +97,41 @@ function PreferenceModal() {
   );
 }
 
+function RecipesLoading() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="rounded-3xl bg-card border-none shadow-md overflow-hidden h-full">
+          <Skeleton className="h-56 w-full rounded-none" />
+          <div className="p-6 space-y-4">
+            <Skeleton className="h-7 w-3/4 rounded-md" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full rounded-md" />
+              <Skeleton className="h-4 w-5/6 rounded-md" />
+            </div>
+            <div className="flex gap-6 pt-2">
+              <Skeleton className="h-5 w-20 rounded-md" />
+              <Skeleton className="h-5 w-20 rounded-md" />
+            </div>
+          </div>
+          <div className="p-6 pt-0">
+            <Skeleton className="h-12 w-full rounded-xl" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function RecipeResults() {
+  const { status } = useInstantSearch();
   const { hits } = useHits<Recipe>();
   const { query, clear } = useSearchBox();
   const recipes = hits.length > 0 ? hits : [];
+
+  if (status === 'loading' || status === 'stalled') {
+    return <RecipesLoading />;
+  }
 
   if (recipes.length === 0 && query) {
     return (
