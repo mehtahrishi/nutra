@@ -7,10 +7,10 @@ export async function GET(request: NextRequest) {
   try {
     await connectDB();
     
-    // Get recent popular recipes
+    // Get recent recipes (newest first)
     const recipes = await Recipe.find()
       .select('-__v')
-      .sort({ views: -1, likes: -1, createdAt: -1 })
+      .sort({ createdAt: -1, views: -1 })
       .limit(12)
       .lean();
     

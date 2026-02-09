@@ -9,6 +9,9 @@ import { FoodParticles } from '@/components/FoodParticles';
 import { ScrollAnimation } from '@/components/ScrollAnimation';
 import { FaAlgolia } from 'react-icons/fa6';
 
+// Revalidate this page every 30 seconds to show fresh recipes
+export const revalidate = 30;
+
 async function getFeaturedRecipes() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9002'}/api/recipes/featured`, {
@@ -45,7 +48,7 @@ export default async function Home() {
             </Badge>
           </div>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold text-foreground leading-[1.05] tracking-tight">
-            Elevate Your <br />
+            Elevate Your Taste With <br />
             <span className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-gradient-text bg-clip-text text-transparent italic relative">
               <TypewriterText text="AutoYum" speed={100} />
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 blur-xl -z-10 animate-pulse-glow"></div>
