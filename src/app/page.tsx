@@ -8,6 +8,8 @@ import { TypewriterText } from '@/components/TypewriterText';
 import { FoodParticles } from '@/components/FoodParticles';
 import { ScrollAnimation } from '@/components/ScrollAnimation';
 import { FaAlgolia } from 'react-icons/fa6';
+import { connectDB } from '@/lib/mongodb';
+import { Recipe } from '@/models/Recipe';
 
 // Force dynamic rendering - always fetch fresh data
 export const dynamic = 'force-dynamic';
@@ -15,18 +17,16 @@ export const revalidate = 0;
 
 async function getFeaturedRecipes() {
   try {
-    // Build the correct URL based on environment
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9002';
+    // Fetch directly from MongoDB instead of HTTP request
+    await connectDB();
     
-    const res = await fetch(`${baseUrl}/api/recipes/featured`, {
-      cache: 'no-store',
-      next: { revalidate: 0 }
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.data || [];
+    const recipes = await Recipe.find()
+      .select('-__v')
+      .sort({ createdAt: -1, views: -1 })
+      .limit(12)
+      .lean();
+    
+    return recipes || [];
   } catch (error) {
     console.error('Error fetching featured recipes:', error);
     return [];
