@@ -47,7 +47,7 @@ export default async function Home() {
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold text-foreground leading-[1.05] tracking-tight">
             Elevate Your <br />
             <span className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-gradient-text bg-clip-text text-transparent italic relative">
-              <TypewriterText text="Culinary Intelligence" speed={100} />
+              <TypewriterText text="AutoYum" speed={100} />
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 blur-xl -z-10 animate-pulse-glow"></div>
             </span>
           </h1>

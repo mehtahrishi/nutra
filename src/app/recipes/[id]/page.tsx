@@ -157,16 +157,75 @@ function parseInstructionString(text: string): string[] {
     .replace(/__(.*?)__/g, '$1')      // Remove __bold__
     .replace(/_(.*?)_/g, '$1');       // Remove _italic_
   
-  // Try to split by numbered patterns like "1.", "2.", etc.
-  const numberedSteps = text.split(/\d+\.\s+/).filter(s => s.trim());
-  if (numberedSteps.length > 1) {
-    return numberedSteps.map(s => s.trim());
+  // First try: Split by newlines (most common in AI responses)
+  let steps = text.split(/\n+/).filter(s => s.trim());
+  if (steps.length > 1) {
+    return steps.map(s => s.replace(/^\d+[\.\)]\s+/, '').trim()).filter(s => s.length > 0);
   }
   
-  // Try to split by sentence boundaries for long paragraphs
-  const sentences = text.split(/\.\s+(?=[A-Z])/);
-  if (sentences.length > 3) {
-    return sentences.map(s => s.trim() + (s.endsWith('.') ? '' : '.'));
+  // Second try: Split by numbered patterns - handle embedded numbers like "heat.2. Add"
+  // This pattern matches: ".1. ", ".2. ", " 1. ", " 2. ", etc.
+  const embeddedNumberPattern = /[\.\s](\d+)\.\s+/g;
+  const matches = [...text.matchAll(embeddedNumberPattern)];
+  
+  if (matches.length > 0) {
+    steps = [];
+    let lastIndex = 0;
+    
+    matches.forEach((match, i) => {
+      const matchIndex = match.index!;
+      
+      // Add text before this number (skip for first match)
+      if (i === 0) {
+        const firstPart = text.substring(0, matchIndex).trim();
+        if (firstPart) {
+          // Remove any leading numbers from first part
+          steps.push(firstPart.replace(/^\d+[\.\)]\s+/, '').trim());
+        }
+      }
+      
+      // Find start of next step (or end of text)
+      const nextMatch = matches[i + 1];
+      const endIndex = nextMatch ? nextMatch.index! : text.length;
+      
+      // Extract the step content
+      const stepContent = text.substring(matchIndex + match[0].length, endIndex).trim();
+      if (stepContent) {
+        steps.push(stepContent);
+      }
+      
+      lastIndex = endIndex;
+    });
+    
+    if (steps.length > 0) {
+      return steps;
+    }
+  }
+  
+  // Third try: Standard numbered pattern at start
+  const numberedPattern = /^\d+[\.\)]\s+/;
+  steps = text.split(/(?=\d+[\.\)]\s+)/).filter(s => s.trim());
+  if (steps.length > 1) {
+    return steps.map(s => s.replace(numberedPattern, '').trim()).filter(s => s.length > 0);
+  }
+  
+  // Fourth try: Split by sentence boundaries where sentences start with action verbs
+  const actionPattern = /\.\s+(?=(?:Heat|Add|Mix|Stir|Cook|Bake|Pour|Place|Remove|Combine|Whisk|Fold|Serve|Garnish|Season|Chop|Cut|Slice|Preheat|Transfer|Bring|Reduce|Simmer|Boil|Fry|Sauté|Roast|Grill|Blend|Drain|Rinse|Pat|Sprinkle|Drizzle|Toss|Let|Allow|Set|Cover|Uncover)[A-Z\s])/g;
+  steps = text.split(actionPattern).filter(s => s.trim());
+  if (steps.length > 1) {
+    return steps.map(s => {
+      s = s.trim();
+      return s.endsWith('.') ? s : s + '.';
+    });
+  }
+  
+  // Fourth try: Split by general sentence boundaries (capital letter after period)
+  steps = text.split(/\.\s+(?=[A-Z])/);
+  if (steps.length > 2) {
+    return steps.map(s => {
+      s = s.trim();
+      return s.endsWith('.') ? s : s + '.';
+    });
   }
   
   // Return as single step if no clear separation

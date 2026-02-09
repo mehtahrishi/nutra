@@ -139,21 +139,41 @@ export default function DiscoverPage() {
             fiber: output.nutritionalInfo?.fiber || 5,
             sodium: output.nutritionalInfo?.sodium || 0,
             ingredients: ingredientsList,
-            instructions: output.instructions
-              .split('\n')
-              .map(s => s.trim())
-              .filter(s => s.length > 0)
-              .map(s => {
-                // Remove markdown formatting
-                let cleaned = s
-                  .replace(/\*\*(.*?)\*\*/g, '$1')
-                  .replace(/\*(.*?)\*/g, '$1')
-                  .replace(/__(.*?)__/g, '$1')
-                  .replace(/_(.*?)_/g, '$1')
-                  .trim();
-                return cleaned;
-              })
-              .filter(s => s.length > 0),
+            instructions: (() => {
+              let instructionsText = output.instructions;
+              
+              // Remove markdown formatting first
+              instructionsText = instructionsText
+                .replace(/\*\*(.*?)\*\*/g, '$1')
+                .replace(/\*(.*?)\*/g, '$1')
+                .replace(/__(.*?)__/g, '$1')
+                .replace(/_(.*?)_/g, '$1');
+              
+              // Try splitting by newlines first (most common)
+              let steps = instructionsText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+              
+              // If only one step, it might be a paragraph with embedded numbers
+              if (steps.length === 1) {
+                const text = steps[0];
+                
+                // Split by numbered patterns like "1.", "2.", etc.
+                // Match patterns like ".1. ", ".2. ", " 1. ", " 2. " at word boundaries
+                const parts = text.split(/(?:^|\s)(\d+)\.\s+/).filter(s => s.trim());
+                
+                if (parts.length > 2) {
+                  // Rebuild steps by pairing numbers with their text
+                  steps = [];
+                  for (let i = 0; i < parts.length; i += 2) {
+                    if (parts[i + 1]) {
+                      steps.push(parts[i + 1].trim());
+                    }
+                  }
+                }
+              }
+              
+              // Clean up each step: remove leading numbers if still present
+              return steps.map(s => s.replace(/^\d+[\.\)]\s*/, '').trim()).filter(s => s.length > 0);
+            })(),
             searchKeywords: formData.ingredients.split(',').map(i => i.trim().toLowerCase()),
             mainIngredients: formData.ingredients.split(',').slice(0, 5).map(i => i.trim()),
             source: 'ai-generated',
