@@ -33,10 +33,8 @@ function transformRecipeForAlgolia(recipe: any) {
     fiber: recipe.fiber,
     mainIngredients: recipe.mainIngredients || [],
     searchKeywords: recipe.searchKeywords || [],
-    healthBenefits: recipe.healthBenefits || [],
     source: recipe.source,
     views: recipe.views || 0,
-    likes: recipe.likes || 0,
     createdAt: recipe.createdAt,
     updatedAt: recipe.updatedAt,
     // Flatten ingredients for better searchability
@@ -63,7 +61,11 @@ export async function syncRecipesToAlgolia() {
     
     if (recipes.length === 0) {
       console.log('⚠️  No recipes found in database. Run seed script first.');
-      return;
+      return {
+        success: true,
+        count: 0,
+        recipes: []
+      };
     }
     
     console.log(`📊 Found ${recipes.length} recipes to sync`);

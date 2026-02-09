@@ -20,6 +20,7 @@ export interface IRecipe {
   carbs: number; // in grams
   fat: number; // in grams
   fiber?: number; // in grams
+  sodium?: number; // in milligrams
   
   // Recipe content
   ingredients: Array<{
@@ -29,14 +30,12 @@ export interface IRecipe {
   }>;
   instructions: string[];
   
-  // Health & AI Features
-  healthBenefits?: string[];
-  tips?: string[];
-  substitutions?: Array<{
-    original: string;
-    replacement: string;
-    reason?: string;
-  }>;
+  // AI Features
+  cookingTips?: string[];
+  warnings?: string[];
+  variations?: string[];
+  equipment?: string[];
+  storageInfo?: string;
   
   // Search & Discovery
   searchKeywords: string[];
@@ -48,7 +47,6 @@ export interface IRecipe {
   createdAt: Date;
   updatedAt: Date;
   views: number;
-  likes: number;
 }
 
 const RecipeSchema = new Schema<IRecipe>(
@@ -70,6 +68,7 @@ const RecipeSchema = new Schema<IRecipe>(
     carbs: Number,
     fat: Number,
     fiber: Number,
+    sodium: Number,
     
     ingredients: [{
       item: String,
@@ -78,21 +77,18 @@ const RecipeSchema = new Schema<IRecipe>(
     }],
     instructions: [String],
     
-    healthBenefits: [String],
-    tips: [String],
-    substitutions: [{
-      original: String,
-      replacement: String,
-      reason: String
-    }],
+    cookingTips: [String],
+    warnings: [String],
+    variations: [String],
+    equipment: [String],
+    storageInfo: String,
     
     searchKeywords: [{ type: String, index: true }],
     mainIngredients: [{ type: String, index: true }],
     
     source: { type: String, enum: ['ai-generated', 'curated', 'user-submitted'], default: 'curated' },
     aiReasoning: String,
-    views: { type: Number, default: 0 },
-    likes: { type: Number, default: 0 }
+    views: { type: Number, default: 0 }
   },
   {
     timestamps: true

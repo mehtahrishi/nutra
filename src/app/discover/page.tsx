@@ -124,7 +124,7 @@ export default function DiscoverPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             title: output.recipeName,
-            description: output.reasoning,
+            description: output.flavorProfile || output.reasoning,
             category: 'Main Course',
             dietaryTags: formData.dietaryRestrictions.split(',').map(d => d.trim().toLowerCase()).filter(Boolean),
             prepTime: output.cookingDetails?.prepTime || 15,
@@ -137,9 +137,23 @@ export default function DiscoverPage() {
             carbs: output.nutritionalInfo?.carbs || 30,
             fat: output.nutritionalInfo?.fat || 15,
             fiber: output.nutritionalInfo?.fiber || 5,
-            sodium: output.nutritionalInfo?.sodium || 500,
+            sodium: output.nutritionalInfo?.sodium || 0,
             ingredients: ingredientsList,
-            instructions: output.instructions.split('\n').filter(s => s.trim()),
+            instructions: output.instructions
+              .split('\n')
+              .map(s => s.trim())
+              .filter(s => s.length > 0)
+              .map(s => {
+                // Remove markdown formatting
+                let cleaned = s
+                  .replace(/\*\*(.*?)\*\*/g, '$1')
+                  .replace(/\*(.*?)\*/g, '$1')
+                  .replace(/__(.*?)__/g, '$1')
+                  .replace(/_(.*?)_/g, '$1')
+                  .trim();
+                return cleaned;
+              })
+              .filter(s => s.length > 0),
             searchKeywords: formData.ingredients.split(',').map(i => i.trim().toLowerCase()),
             mainIngredients: formData.ingredients.split(',').slice(0, 5).map(i => i.trim()),
             source: 'ai-generated',
@@ -149,7 +163,6 @@ export default function DiscoverPage() {
             variations: output.variations || [],
             equipment: output.equipment || [],
             storageInfo: output.storageInfo || '',
-            flavorProfile: output.flavorProfile || '',
             imageUrl: output.imageUrl || ''
           })
         });

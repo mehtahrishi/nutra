@@ -36,7 +36,7 @@ export type AIRecipeDiscoveryInput = z.infer<typeof AIRecipeDiscoveryInputSchema
 const AIRecipeDiscoveryOutputSchema = z.object({
   recipeName: z.string().describe('The name of the generated recipe.'),
   ingredients: z.string().describe('A detailed list of ingredients with quantities and measurements.'),
-  instructions: z.string().describe('Step-by-step instructions for preparing the recipe.'),
+  instructions: z.string().describe('Step-by-step numbered instructions, one complete step per line (format: "1. [full instruction]\\n2. [full instruction]\\n..."). Each step must be complete and self-contained.'),
   reasoning: z.string().describe('Reasoning behind the recipe generation'),
   imageUrl: z.string().describe('A high-quality food image URL from Pexels API that matches the recipe'),
   nutritionalInfo: z.object({
@@ -75,7 +75,7 @@ const prompt = ai.definePrompt({
 
   Create a recipe that includes:
   - Precise ingredient measurements
-  - Detailed step-by-step instructions with cooking techniques
+  - Detailed step-by-step instructions (one complete instruction per line, numbered 1-N)
   - Accurate nutritional information per serving
   - Professional cooking tips and techniques
   - Important warnings about overcooking, food safety, or common mistakes
@@ -84,6 +84,13 @@ const prompt = ai.definePrompt({
   - Storage instructions
   - Possible variations
   - A high-quality food image that matches the recipe (will be fetched automatically)
+
+  **Instructions Format:**
+  - Write each step as a complete, self-contained instruction
+  - Number steps sequentially: 1. [instruction]
+  - Each step should be on its own line
+  - Do not break steps mid-sentence
+  - Each step should be actionable and clear
 
   For the imageUrl field, provide keywords that describe the dish (e.g., "chicken curry", "chocolate cake", "fresh salad", "grilled salmon"). The system will automatically fetch a high-quality food image from Pexels API that matches your recipe.
 

@@ -61,8 +61,7 @@ export async function configureAlgoliaIndex() {
         
         // Custom ranking (secondary sort)
         customRanking: [
-          'desc(views)',
-          'desc(likes)'
+          'desc(views)'
         ],
         
         // Attributes to retrieve
@@ -78,8 +77,7 @@ export async function configureAlgoliaIndex() {
           'calories',
           'mainIngredients',
           'difficulty',
-          'views',
-          'likes'
+          'views'
         ],
         
         // Highlighting

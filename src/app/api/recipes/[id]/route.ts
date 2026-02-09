@@ -6,14 +6,15 @@ import { syncSingleRecipe, deleteRecipeFromAlgolia } from '@/lib/sync-algolia';
 // GET /api/recipes/[id] - Get single recipe by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
     
     const recipe = await Recipe.findByIdAndUpdate(
-      params.id,
-      { $inc: { views: 1 } }, // Increment view count
+      id,
+      { $inc: { views: 1 } },
       { new: true }
     ).select('-__v').lean();
     
@@ -40,14 +41,15 @@ export async function GET(
 // PUT /api/recipes/[id] - Update a recipe
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
     
     const body = await request.json();
     const recipe = await Recipe.findByIdAndUpdate(
-      params.id,
+      id,
       body,
       { new: true, runValidators: true }
     ).select('-__v').lean();
@@ -60,7 +62,7 @@ export async function PUT(
     }
     
     // Sync to Algolia (non-blocking)
-    syncSingleRecipe(params.id).catch(err => 
+    syncSingleRecipe(id).catch(err => 
       console.error('Algolia sync failed:', err)
     );
     
@@ -80,12 +82,13 @@ export async function PUT(
 // DELETE /api/recipes/[id] - Delete a recipe
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
     
-    const recipe = await Recipe.findByIdAndDelete(params.id);
+    const recipe = await Recipe.findByIdAndDelete(id);
     
     if (!recipe) {
       return NextResponse.json(
@@ -95,7 +98,7 @@ export async function DELETE(
     }
     
     // Delete from Algolia (non-blocking)
-    deleteRecipeFromAlgolia(params.id).catch((err: any) => 
+    deleteRecipeFromAlgolia(id).catch((err: any) => 
       console.error('Algolia delete failed:', err)
     );
     
