@@ -253,14 +253,14 @@ export default function RecipeDetailPage() {
             
             {/* Flavor Experience */}
             {recipe.description && (
-              <Card className="mb-6 rounded-2xl border-none shadow-lg overflow-hidden bg-gradient-to-r from-amber-50 via-orange-50 to-rose-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-rose-900/20">
+              <Card className="mb-6 rounded-2xl border-none shadow-lg overflow-hidden bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 dark:from-primary/20 dark:via-accent/20 dark:to-primary/20">
                 <CardContent className="p-5">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-amber-500/10">
-                      <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Sparkles className="w-5 h-5 text-primary dark:text-primary" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-base font-headline font-semibold mb-2 text-amber-900 dark:text-amber-100">
+                      <h3 className="text-base font-headline font-semibold mb-2 text-primary dark:text-primary">
                         Flavor Experience
                       </h3>
                       <p className="text-base text-muted-foreground leading-relaxed">
@@ -530,7 +530,7 @@ export default function RecipeDetailPage() {
 
               {/* Warnings */}
               {recipe.warnings && recipe.warnings.length > 0 && (
-                <Card className="rounded-3xl border-none shadow-2xl overflow-hidden bg-gradient-to-br from-red-500 to-orange-500">
+                <Card className="rounded-3xl border-none shadow-2xl overflow-hidden bg-gradient-to-br from-accent to-primary">
                   <CardContent className="p-8">
                     <h3 className="text-2xl font-headline font-bold mb-6 flex items-center gap-3 text-white">
                       <div className="p-2 rounded-xl bg-white/20">
