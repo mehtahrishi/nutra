@@ -1,4 +1,4 @@
-# **App Name**: NutriGenius AI
+# **App Name**: Auto-Yum
 
 ## Core Features:
 

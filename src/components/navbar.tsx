@@ -2,7 +2,7 @@
 "use client"
 
 import Link from 'next/link';
-import { ChefHat, Search, Sparkles, Heart, User, Menu } from 'lucide-react';
+import { ChefHat, Sparkles, Search, Menu, UtensilsCrossed } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import {
@@ -16,23 +16,17 @@ export function Navbar() {
 
   const NavItems = () => (
     <>
-      <Link href="/discover" className="flex items-center gap-2 text-foreground/80 hover:text-primary transition-colors py-2 md:py-0">
-        <Sparkles className="w-4 h-4" />
-        <span className="font-headline">Discover AI</span>
-      </Link>
-      <Link href="/recipes" className="flex items-center gap-2 text-foreground/80 hover:text-primary transition-colors py-2 md:py-0">
+      <Link href="/search" className="flex items-center gap-2 text-foreground/80 hover:text-primary transition-colors py-2 md:py-0">
         <Search className="w-4 h-4" />
         <span className="font-headline">Search</span>
       </Link>
-      <Link href="/favorites" className="flex items-center gap-2 text-foreground/80 hover:text-primary transition-colors py-2 md:py-0">
-        <Heart className="w-4 h-4" />
-        <span className="font-headline">Saved</span>
+      <Link href="/discover" className="flex items-center gap-2 text-foreground/80 hover:text-primary transition-colors py-2 md:py-0">
+        <Sparkles className="w-4 h-4" />
+        <span className="font-headline">AI Discovery</span>
       </Link>
-      <Link href="/auth">
-        <Button variant="default" className="w-full md:w-auto font-headline bg-primary hover:bg-primary/90">
-          <User className="w-4 h-4 mr-2" />
-          Join Us
-        </Button>
+      <Link href="/recipes" className="flex items-center gap-2 text-foreground/80 hover:text-primary transition-colors py-2 md:py-0">
+        <UtensilsCrossed className="w-4 h-4" />
+        <span className="font-headline">Recipes</span>
       </Link>
     </>
   );
@@ -45,7 +39,7 @@ export function Navbar() {
             <ChefHat className="w-8 h-8" />
           </div>
           <span className="text-2xl font-headline font-bold tracking-tight">
-            Nutri<span className="text-accent">Genius</span>
+            Auto<span className="text-accent">Yum</span>
           </span>
         </Link>
 
