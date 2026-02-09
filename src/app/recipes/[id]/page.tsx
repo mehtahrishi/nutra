@@ -26,7 +26,8 @@ import {
   TrendingUp,
   Leaf,
   Lightbulb,
-  Repeat
+  Repeat,
+  X
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { aiCookingAssistant, AiCookingAssistantOutput } from '@/ai/flows/ai-cooking-assistant';
@@ -37,6 +38,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 
 // Helper function to clean markdown formatting from text
@@ -710,29 +712,41 @@ export default function RecipeDetailPage() {
             <BrainCircuit className="w-8 h-8 group-hover:animate-pulse" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-2xl rounded-2xl border-none shadow-xl p-0 overflow-hidden">
-          <div className="bg-primary p-6 text-white">
+        <DialogContent className="max-w-2xl rounded-3xl border-none shadow-2xl p-0 overflow-hidden bg-gradient-to-br from-primary/5 to-accent/5">
+          <DialogClose className="absolute right-4 top-4 rounded-full p-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white hover:text-white transition-all duration-200 z-10 border-2 border-white/40">
+            <X className="w-5 h-5" />
+          </DialogClose>
+          <div className="bg-gradient-to-r from-primary via-accent to-primary p-6 text-white">
             <DialogHeader>
               <DialogTitle className="text-2xl font-headline flex items-center gap-2">
                 <Sparkles className="w-6 h-6" />
                 AI Kitchen Genius
               </DialogTitle>
-              <DialogDescription className="text-white/80 text-base">
+              <DialogDescription className="text-white/90 text-base">
                 Get personalized cooking tips, substitutions, and expert advice for this recipe.
               </DialogDescription>
             </DialogHeader>
           </div>
-          <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+          <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto bg-white dark:bg-gray-900">
             {aiLoading ? (
               <div className="flex flex-col items-center justify-center py-12 space-y-3">
                 <Loader2 className="w-10 h-10 text-primary animate-spin" />
                 <p className="text-base font-headline text-muted-foreground">The AI is analyzing the recipe...</p>
               </div>
             ) : aiResult ? (
-              <div className="prose prose-orange max-w-none">
-                <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground/80">
-                  {aiResult.suggestions}
-                </div>
+              <div className="space-y-3">
+                {aiResult.suggestions
+                  .split(/\.(?=[A-Z]|\s*[A-Z])/)
+                  .map((sentence: string) => sentence.trim())
+                  .filter((sentence: string) => sentence.length > 0)
+                  .map((sentence: string, i: number) => (
+                  <div key={i} className="flex gap-3 items-start p-4 rounded-xl bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10 hover:border-primary/30 transition-all duration-200">
+                    <span className="text-primary font-bold text-lg mt-0.5">−</span>
+                    <p className="text-base leading-relaxed text-foreground flex-1">
+                      {sentence.endsWith('.') ? sentence : sentence + '.'}
+                    </p>
+                  </div>
+                ))}
               </div>
             ) : (
               <p className="text-center text-muted-foreground">Click the button to get AI-powered suggestions!</p>
