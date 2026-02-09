@@ -163,65 +163,52 @@ function parseInstructionString(text: string): string[] {
     return steps.map(s => s.replace(/^\d+[\.\)]\s+/, '').trim()).filter(s => s.length > 0);
   }
   
-  // Second try: Split by numbered patterns - handle embedded numbers like "heat.2. Add"
-  // This pattern matches: ".1. ", ".2. ", " 1. ", " 2. ", etc.
-  const embeddedNumberPattern = /[\.\s](\d+)\.\s+/g;
-  const matches = [...text.matchAll(embeddedNumberPattern)];
+  // Second try: Split by embedded numbered patterns like "aside.2. In"
+  // Pattern: period or end of sentence + number + period + space
+  const embeddedNumberPattern = /\.(\d+)\.\s+/g;
   
-  if (matches.length > 0) {
+  if (embeddedNumberPattern.test(text)) {
+    // Reset regex
+    embeddedNumberPattern.lastIndex = 0;
+    
     steps = [];
     let lastIndex = 0;
+    let match;
     
-    matches.forEach((match, i) => {
-      const matchIndex = match.index!;
+    while ((match = embeddedNumberPattern.exec(text)) !== null) {
+      // Extract text from last position to before the number pattern
+      const stepText = text.substring(lastIndex, match.index + 1).trim(); // +1 to include the period before number
       
-      // Add text before this number (skip for first match)
-      if (i === 0) {
-        const firstPart = text.substring(0, matchIndex).trim();
-        if (firstPart) {
-          // Remove any leading numbers from first part
-          steps.push(firstPart.replace(/^\d+[\.\)]\s+/, '').trim());
-        }
+      if (stepText && steps.length === 0) {
+        // First step - remove any leading number
+        steps.push(stepText.replace(/^\d+[\.\)]\s+/, '').trim());
       }
       
-      // Find start of next step (or end of text)
-      const nextMatch = matches[i + 1];
-      const endIndex = nextMatch ? nextMatch.index! : text.length;
-      
-      // Extract the step content
-      const stepContent = text.substring(matchIndex + match[0].length, endIndex).trim();
-      if (stepContent) {
-        steps.push(stepContent);
-      }
-      
-      lastIndex = endIndex;
-    });
+      lastIndex = match.index + match[0].length - 1; // Position after the pattern
+    }
     
-    if (steps.length > 0) {
-      return steps;
+    // Add the last step
+    const lastStep = text.substring(lastIndex).trim();
+    if (lastStep) {
+      steps.push(lastStep);
+    }
+    
+    // If we got multiple steps, return them
+    if (steps.length > 1) {
+      return steps.filter(s => s.length > 0);
     }
   }
   
-  // Third try: Standard numbered pattern at start
-  const numberedPattern = /^\d+[\.\)]\s+/;
+  // Third try: Standard numbered pattern at start of string
   steps = text.split(/(?=\d+[\.\)]\s+)/).filter(s => s.trim());
   if (steps.length > 1) {
-    return steps.map(s => s.replace(numberedPattern, '').trim()).filter(s => s.length > 0);
+    return steps.map(s => s.replace(/^\d+[\.\)]\s+/, '').trim()).filter(s => s.length > 0);
   }
   
-  // Fourth try: Split by sentence boundaries where sentences start with action verbs
-  const actionPattern = /\.\s+(?=(?:Heat|Add|Mix|Stir|Cook|Bake|Pour|Place|Remove|Combine|Whisk|Fold|Serve|Garnish|Season|Chop|Cut|Slice|Preheat|Transfer|Bring|Reduce|Simmer|Boil|Fry|Sauté|Roast|Grill|Blend|Drain|Rinse|Pat|Sprinkle|Drizzle|Toss|Let|Allow|Set|Cover|Uncover)[A-Z\s])/g;
+  // Fourth try: Split by sentence boundaries with action verbs
+  const actionPattern = /\.\s+(?=(?:Heat|Add|Mix|Stir|Cook|Bake|Pour|Place|Remove|Combine|Whisk|Fold|Serve|Garnish|Season|Chop|Cut|Slice|Preheat|Transfer|Bring|Reduce|Simmer|Boil|Fry|Sauté|Roast|Grill|Blend|Drain|Rinse|Pat|Sprinkle|Drizzle|Toss|Let|Allow|Set|Cover|Uncover|Continue|Once|If|The)\s+[a-z])/g;
   steps = text.split(actionPattern).filter(s => s.trim());
   if (steps.length > 1) {
-    return steps.map(s => {
-      s = s.trim();
-      return s.endsWith('.') ? s : s + '.';
-    });
-  }
-  
-  // Fourth try: Split by general sentence boundaries (capital letter after period)
-  steps = text.split(/\.\s+(?=[A-Z])/);
-  if (steps.length > 2) {
     return steps.map(s => {
       s = s.trim();
       return s.endsWith('.') ? s : s + '.';
